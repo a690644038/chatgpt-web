@@ -5,6 +5,7 @@ import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
 import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
+import user from './user'
 
 const app = express()
 const router = express.Router()
@@ -80,8 +81,18 @@ router.post('/verify', async (req, res) => {
   }
 })
 
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`)
+  next()
+})
+
+
+
 app.use('', router)
 app.use('/api', router)
+console.log(user,'xxxxxxxxxxxxxxxxxxx')
+app.use('/user', user)
 app.set('trust proxy', 1)
 
 app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))

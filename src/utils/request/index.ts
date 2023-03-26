@@ -25,7 +25,7 @@ function http<T = any>(
   const successHandler = (res: AxiosResponse<Response<T>>) => {
     const authStore = useAuthStore()
 
-    if (res.data.status === 'Success' || typeof res.data === 'string')
+    if (res.data.status === 'Success' || typeof res.data === 'string'||res.status==200)
       return res.data
 
     if (res.data.status === 'Unauthorized') {
