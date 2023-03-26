@@ -91,7 +91,6 @@ app.use((req, res, next) => {
 
 app.use('', router)
 app.use('/api', router)
-console.log(user,'xxxxxxxxxxxxxxxxxxx')
 app.use('/user', user)
 app.set('trust proxy', 1)
 
