@@ -40,7 +40,7 @@ function showLoginDialog() {
         {{ userInfo.name ?? 'ChenZhaoYu' }}
       </h2>
          <h2 class="font-bold text-md cus_p" v-else @click="showLoginDialog">
-        δ��¼
+        未登录
       </h2>
       <p class="overflow-hidden text-xs text-gray-500 text-ellipsis whitespace-nowrap">
         <span
