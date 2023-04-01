@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" center>
+  <el-dialog v-model="visible" center width="400px" title="注册">
     <el-form
       ref="ruleFormRef"
       :model="form"
@@ -31,9 +31,11 @@
           <el-button
             type="primary"
             class="ml-10"
-            :disabled="disableGetCode"
+            :disabled="state.disableGetCode"
+            dark
+            color="#303133"
             @click="handleSendCode"
-            >{{ getCodeButtonText }}</el-button
+            >{{ state.getCodeButtonText }}</el-button
           >
         </div>
       </el-form-item>
@@ -43,6 +45,7 @@
           type="password"
           size="large"
           v-model="form.password"
+          show-password
           placeholder="请输入密码"
         ></el-input>
       </el-form-item>
@@ -52,10 +55,15 @@
           size="large"
           v-model="form.confirmPassword"
           placeholder="请再次输入密码"
+          show-password
         ></el-input>
       </el-form-item>
       <div class="tc_c">
-        <el-button type="primary" @click="submitForm(ruleFormRef)"
+        <el-button
+          type="primary"
+          @click="submitForm(ruleFormRef)"
+          dark
+          color="#303133"
           >注册</el-button
         >
       </div>
@@ -64,17 +72,17 @@
 </template>
   
   <script setup lang="ts">
-import { ref, defineEmits } from "vue";
+import { ref, defineEmits, reactive } from "vue";
 import type { FormInstance } from "element-plus";
-import { fetchRegister,sendEmail } from "@/api";
+import { fetchRegister, sendEmail } from "@/api";
 import { ElMessage } from "element-plus";
-import { useUserStore } from '@/store'
-import type { UserInfo } from '@/store/modules/user/helper'
-const userStore = useUserStore()
+import { useUserStore } from "@/store";
+import type { UserInfo } from "@/store/modules/user/helper";
+const userStore = useUserStore();
 
 let visible = ref(false);
 function updateUserInfo(options: Partial<UserInfo>) {
-  userStore.updateUserInfo(options)
+  userStore.updateUserInfo(options);
 }
 
 const ruleFormRef = ref<FormInstance>();
@@ -86,9 +94,7 @@ interface Form {
   confirmPassword: string;
 }
 
-
-
-const emits = defineEmits(['close']);
+const emits = defineEmits(["close"]);
 
 const form = ref<Form>({
   username: "lihh",
@@ -125,7 +131,9 @@ const rules: Rules = {
       trigger: ["blur", "change"],
     },
   ],
-  verificationCode: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+  verificationCode: [
+    { required: true, message: "请输入验证码", trigger: "blur" },
+  ],
   password: [
     { required: true, message: "请输入密码", trigger: "blur" },
     { min: 6, max: 20, message: "密码长度必须为6到20个字符", trigger: "blur" },
@@ -145,17 +153,36 @@ const rules: Rules = {
   ] as ValidatorRule[],
 };
 
-const getCodeButtonText = "获取验证码";
-const disableGetCode = false;
+const state = reactive({
+  getCodeButtonText: "获取验证码",
+  disableGetCode: false,
+});
+let countdown = 60;
 
 function handleSendCode() {
+  if (state.disableGetCode) return;
   // TODO: send verification code to user's phone number
-  console.log("Sending verification code...");
-  sendEmail<any>({email:form.value.email})
-    .then((response) => {})
-    .catch((error) => {
-      console.log("error submit!", error);
-    });
+  // 发送成功后开始倒计时
+
+  sendEmail<any>({ email: form.value.email })
+    .then((response) => {
+      state.disableGetCode = true;
+      state.getCodeButtonText = `${countdown}s 后重发`;
+
+      const timer = setInterval(() => {
+        countdown--;
+
+        if (countdown === 0) {
+          clearInterval(timer);
+          state.getCodeButtonText = "重新发送";
+          state.disableGetCode = false;
+          countdown = 60;
+        } else {
+          state.getCodeButtonText = `${countdown}s 后重发`;
+        }
+      }, 1000);
+    })
+    .catch((error) => {});
 }
 
 // const submitForm = async (ruleFormRef: FormInstance | undefined) => {
@@ -187,22 +214,23 @@ const submitForm = (ruleFormRef: FormInstance | undefined) => {
     })
     .then((response) => {
       // let data = response;
-      const code = response?.code; // 使用可选链操作符访问响应数据
-      const msg = response?.msg;
-      const loginToken = response?.data?.token;
-      const name = response?.data?.username;
-      updateUserInfo({ loginToken })
-      updateUserInfo({ name })
+      const data = response as { code?: number; msg?: string; data?: { token?: string; username?: string } };
+      const code = data?.code;
+      const msg = data?.msg;
+      const loginToken = data?.data?.token;
+      const name = data?.data?.username;
+      updateUserInfo({ loginToken });
+      updateUserInfo({ name });
 
-      console.log(name,loginToken);
-      
+      console.log(name, loginToken);
+
       if (code == 1) {
         ElMessage({
           message: "注册成功",
           type: "success",
         });
         // visible.value = false
-        emits('close');
+        emits("close");
       } else {
         ElMessage.error(msg);
         // emits('close');

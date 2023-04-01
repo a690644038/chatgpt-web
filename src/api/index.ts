@@ -53,14 +53,14 @@ export function fetchVerify<T>(token: string) {
 interface RegisterData {
   username: string;
   email: string;
+  verificationCode: string;
   password: string;
-  phone: string;
-  code:string;
+  confirmPassword: string;
 }
 
 export function fetchRegister<T>(data: RegisterData) {
   return post<T>({
-    url: '/register',
+    url: '/user/register',
     data
   })
 }
@@ -79,7 +79,7 @@ export function fetchLogin<T = any>(data: LoginData) {
 
 export function sendEmail<T>(data:any) {
   return post<T>({
-    url: '/send-verification-code',
+    url: '/user/send-verification-code',
     data
   })
 }

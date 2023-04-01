@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" center>
+  <el-dialog v-model="visible" center width="400px" title="登录">
     <!-- <el-form ref="ruleFormRef" :rules="rules" v-model="ruleForm"   label-width="120px">
       <h3>用户登录</h3>
       <el-form-item label="手机/邮箱" prop="account">
@@ -13,7 +13,7 @@
       </div>
     </el-form> -->
 
-    <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="120px" class="demo-ruleForm" :size="formSize"
+    <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="80px" class="demo-ruleForm" :size="formSize"
       status-icon>
       <el-form-item label="邮箱" prop="email">
         <el-input v-model="ruleForm.email" :prefix-icon="User" size="large" placeholder="请输入手机号或邮箱"></el-input>
@@ -23,7 +23,7 @@
           placeholder="请输入密码"></el-input>
       </el-form-item>
       <div class="tc_c">
-        <el-button style="width: 200px;" dark type="primary" size="large" color="#303133"
+        <el-button style="width: 200px;"  type="primary" size="large" dark color="#303133"
           @click="submitForm(ruleFormRef)">
           登录
         </el-button>
@@ -138,11 +138,19 @@ const submitForm = (ruleFormRef: FormInstance | undefined) => {
     })
     .then(response => {
       // let data = response;
-      const code = response?.code; // 使用可选链操作符访问响应数据
-      const msg = response?.msg;
-      const avatar = response?.data?.avatar; // 使用可选链操作符访问响应数据
-      const loginToken = response?.data?.token;
-      const name = response?.data?.username;
+
+      const data = response as { code?: number; msg?: string; data?: { token?: string; username?: string;avatar?: string } };
+      const code = data?.code;
+      const msg = data?.msg;
+      const loginToken = data?.data?.token;
+      const name = data?.data?.username;
+      const avatar = data?.data?.avatar; // 使用可选链操作符访问响应数据
+
+      // const code = response?.code; // 使用可选链操作符访问响应数据
+      // const msg = response?.msg;
+      // const avatar = response?.data?.avatar; // 使用可选链操作符访问响应数据
+      // const loginToken = response?.data?.token;
+      // const name = response?.data?.username;
       updateUserInfo({ avatar })
       updateUserInfo({ loginToken })
       updateUserInfo({ name })

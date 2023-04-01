@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+// import { ref } from 'vue';
 import { NConfigProvider } from 'naive-ui'
 import { NaiveProvider } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
@@ -8,8 +8,8 @@ import { useLanguage } from '@/hooks/useLanguage'
 const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
 
-const dialogVisible = ref(false);
-const registerVisible = ref(false);
+// const dialogVisible = ref(false);
+// const registerVisible = ref(false);
 
 
 // function openDialog() {
