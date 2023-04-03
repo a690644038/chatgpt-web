@@ -5,7 +5,7 @@ import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
 import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
-import user from './user'
+import user from 'src/user'
 
 const app = express()
 const router = express.Router()
