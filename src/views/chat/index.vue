@@ -1,64 +1,53 @@
 <script setup lang='ts'>
-import type { Ref } from "vue";
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRoute } from "vue-router";
-import { storeToRefs } from "pinia";
-import {
-  NAutoComplete,
-  NButton,
-  NInput,
-  useDialog,
-  useMessage,
-} from "naive-ui";
-import html2canvas from "html2canvas";
-import { Message } from "./components";
-import { useScroll } from "./hooks/useScroll";
-import { useChat } from "./hooks/useChat";
-import { useCopyCode } from "./hooks/useCopyCode";
-import { useUsingContext } from "./hooks/useUsingContext";
-import HeaderComponent from "./components/Header/index.vue";
-import { HoverButton, SvgIcon } from "@/components/common";
-import { useBasicLayout } from "@/hooks/useBasicLayout";
-import { useChatStore, usePromptStore } from "@/store";
-import { fetchChatAPIProcess } from "@/api";
-import { t } from "@/locales";
+import type { Ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
+import html2canvas from 'html2canvas'
+import { Message } from './components'
+import { useScroll } from './hooks/useScroll'
+import { useChat } from './hooks/useChat'
+import { useCopyCode } from './hooks/useCopyCode'
+import { useUsingContext } from './hooks/useUsingContext'
+import HeaderComponent from './components/Header/index.vue'
+import { HoverButton, SvgIcon } from '@/components/common'
+import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { useChatStore, usePromptStore } from '@/store'
+import { fetchChatAPIProcess } from '@/api'
+import { t } from '@/locales'
 import { useSettingStore } from "@/store";
 import type { SettingsState } from "@/store/modules/settings/helper";
 import { useUserStore } from "@/store";
 const userStore = useUserStore();
 
 const settingStore = useSettingStore();
+let controller = new AbortController()
 
-
-let controller = new AbortController();
-
-const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === "true";
+const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === 'true'
 const loginDialogVisible = ref(false);
 const registerDialogVisible = ref(false);
-const route = useRoute();
-const dialog = useDialog();
-const ms = useMessage();
+const route = useRoute()
+const dialog = useDialog()
+const ms = useMessage()
 
-const chatStore = useChatStore();
+const chatStore = useChatStore()
 
-useCopyCode();
+useCopyCode()
 
-const { isMobile } = useBasicLayout();
-const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } =
-  useChat();
-const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll();
-const { usingContext, toggleUsingContext } = useUsingContext();
+const { isMobile } = useBasicLayout()
+const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } = useChat()
+const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
+const { usingContext, toggleUsingContext } = useUsingContext()
 
-const { uuid } = route.params as { uuid: string };
+const { uuid } = route.params as { uuid: string }
 
-const dataSources = computed(() => chatStore.getChatByUuid(+uuid));
-const conversationList = computed(() =>
-  dataSources.value.filter((item) => !item.inversion && !item.error)
-);
+const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
+const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !!item.conversationOptions)))
 
-const prompt = ref<string>("");
-const loading = ref<boolean>(false);
-const inputRef = ref<Ref | null>(null);
+const prompt = ref<string>('')
+const loading = ref<boolean>(false)
+const inputRef = ref<Ref | null>(null)
 
 // 添加PromptStore
 const promptStore = usePromptStore();
