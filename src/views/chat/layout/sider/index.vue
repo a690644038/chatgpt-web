@@ -81,7 +81,7 @@ watch(
         </div>
         <div class="p-4">
           <NButton block @click="show = true">
-            快速调教
+            自定义模板
           </NButton>
         </div>
       </main>

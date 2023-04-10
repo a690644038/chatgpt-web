@@ -78,6 +78,10 @@ import { fetchRegister, sendEmail } from "@/api";
 import { ElMessage } from "element-plus";
 import { useUserStore } from "@/store";
 import type { UserInfo } from "@/store/modules/user/helper";
+import { useAuthStore } from '@/store'
+
+const authStore = useAuthStore()
+
 const userStore = useUserStore();
 
 let visible = ref(false);
@@ -217,12 +221,11 @@ const submitForm = (ruleFormRef: FormInstance | undefined) => {
       const data = response as { code?: number; msg?: string; data?: { token?: string; username?: string } };
       const code = data?.code;
       const msg = data?.msg;
-      const loginToken = data?.data?.token;
+      const loginToken = data?.data?.token||'';
       const name = data?.data?.username;
-      updateUserInfo({ loginToken });
+      authStore.setToken(loginToken)
       updateUserInfo({ name });
 
-      console.log(name, loginToken);
 
       if (code == 1) {
         ElMessage({

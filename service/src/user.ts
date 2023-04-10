@@ -21,7 +21,6 @@ function createResponseObj(data, code, msg) {
 }
 
 
-
 router.post('/send-verification-code', async (req, res) => {
   const { email } = req.body;
 
@@ -91,21 +90,17 @@ router.post('/send-verification-code', async (req, res) => {
   }
 });
 
+
 router.post('/register', async (req, res) => {
   const { email, username, password } = req.body;
 
   if (!email || !username || !password) {
-    // return res.status(400).json({ message: "请填写所有必需字段" });
     return res.status(200).send(createResponseObj({}, 0, "请填写所有必需字段"));
-
   }
 
-  // 检查邮箱格式是否正确
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailPattern.test(email)) {
-    // return res.status(400).json({ message: "邮箱格式不正确" });
     return res.status(200).send(createResponseObj({}, 0, "邮箱格式不正确"));
-
   }
 
   try {
@@ -114,22 +109,19 @@ router.post('/register', async (req, res) => {
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
-
     if (existingUser.length) {
-      // return res.status(409).json({ message: '该邮箱已被注册' });
       return res.status(200).send(createResponseObj({}, 0, "该邮箱已被注册"));
-
     }
 
     // 生成加密密码
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 插入用户数据
+    // 插入用户数据并更新用户 token
+    const levelTime = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
     const [result] = await pool.query(
-      'INSERT INTO users (email, username, password) VALUES (?, ?, ?)',
-      [email, username, hashedPassword]
+      'INSERT INTO users (email, username, password, token, levelTime) VALUES (?, ?, ?, ?, ?)',
+      [email, username, hashedPassword, '', levelTime]
     );
-
     const userId = result.insertId;
 
     // 返回用户信息和 token
@@ -142,14 +134,16 @@ router.post('/register', async (req, res) => {
     res.status(200).send(createResponseObj({
       avatar: null,
       username,
-      token
+      token,
+      levelTime
     }, 1, "注册成功"));
 
   } catch (error) {
     console.error(error);
-    res.sendStatus(500);
+    res.status(500).send(createResponseObj({}, 0, error.message));
   }
 });
+
 
 
 
@@ -193,7 +187,8 @@ router.post('/login', async (req, res) => {
     res.status(200).send(createResponseObj({
       avatar: user.avatar,
       username: user.username,
-      token
+      levelTime:user.levelTime,
+      token,
     }, 1, "登录成功"));
 
   } catch (error) {

@@ -40,12 +40,13 @@ import type { FormInstance, FormRules } from "element-plus";
 import { fetchLogin } from '@/api'
 import { User, Lock } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store'
+import { useAuthStore } from '@/store'
 import type { UserInfo } from '@/store/modules/user/helper'
 import { ElMessage } from 'element-plus'
 let visible = ref(false);
 
 const emits = defineEmits(['close','register']);
-
+const authStore = useAuthStore()
 
 const userStore = useUserStore()
 // const userInfo = computed(() => userStore.userInfo)
@@ -87,49 +88,6 @@ const rules = reactive<FormRules>({
   ],
 });
 
-
-// const submitForm = async (ruleFormRef: FormInstance | undefined) => {
-//   if (!ruleFormRef) return;
-//   await ruleFormRef.validate((valid, fields) => {
-//     if (valid) {
-//       const { data } = fetchLogin<LoginResponse>({
-//         email: "690644038@qq.com",
-//         password: "a123456",
-//       });
-//       console.log(data);
-//     } else {
-//       console.log("error submit!", fields);
-//     }
-//   });
-// };
-
-// const submitForm = async (ruleFormRef: FormInstance | undefined) => {
-//   if (!ruleFormRef) return;
-//    ruleFormRef.validate(async (valid, fields) => {
-//     if (valid) {
-//       // try {
-//       //   const data = await fetchLogin<any>(ruleForm.value);
-//       //   console.log(data);
-//       //   const avatar = data?.data?.code; // 使用可选链操作符访问响应数据
-//       //   const loginToken = data?.data?.msg;
-//       //   const name = data?.data?.username;
-
-//       //   updateUserInfo({avatar})
-//       //   updateUserInfo({loginToken})
-//       //   updateUserInfo({name})
-
-//       //   // 在这里处理响应数据
-//       // } catch (error) {
-//       //   console.error(error);
-//       //   // 在这里处理错误
-//       // }
-
-
-//     } else {
-//       console.log("error submit!", fields);
-//     }
-//   });
-// };
 function regNow(){
   emits('register');
   emits('close');
@@ -147,22 +105,14 @@ const submitForm = (ruleFormRef: FormInstance | undefined) => {
       const data = response as { code?: number; msg?: string; data?: { token?: string; username?: string;avatar?: string } };
       const code = data?.code;
       const msg = data?.msg;
-      const loginToken = data?.data?.token;
+      const loginToken = data?.data?.token||'';
       const name = data?.data?.username;
-      const avatar = data?.data?.avatar; // 使用可选链操作符访问响应数据
+      const avatar = data?.data?.avatar;
 
-      // const code = response?.code; // 使用可选链操作符访问响应数据
-      // const msg = response?.msg;
-      // const avatar = response?.data?.avatar; // 使用可选链操作符访问响应数据
-      // const loginToken = response?.data?.token;
-      // const name = response?.data?.username;
       updateUserInfo({ avatar })
-      updateUserInfo({ loginToken })
       updateUserInfo({ name })
-
-
-
       
+      authStore.setToken(loginToken)
       if (code == 1) {
         ElMessage({
           message: "登录成功",

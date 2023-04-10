@@ -11,7 +11,7 @@
       <el-button type="text" @click="showLevelDialog" >
         <img src="@/assets/vip.png" class="vipimg" alt="" srcset="">
         升级会员</el-button>
-      <span v-if="!userInfo.loginToken">
+      <span v-if="!loginToken">
         <el-button type="text" @click="showLoginDialog">登录</el-button>
         <el-button type="primary" @click="showRegisterDialog">注册</el-button>
       </span>
@@ -29,7 +29,11 @@ import { defineComponent, ref, computed } from "vue";
 //   import RegisterDialog from "@/components/RegisterDialog.vue";
 // import { computed, onMounted,ref } from 'vue'
 import { useUserStore } from "@/store";
+import { useAuthStore } from '@/store'
+
 const userStore = useUserStore();
+const authStore = useAuthStore()
+
 // const userInfo = computed(() => userStore.userInfo)
 // console.log(userInfo.value.token,'x1x1---x1x');
 
@@ -40,7 +44,7 @@ export default defineComponent({
     const registerDialogVisible = ref(false);
     const levelDialogVisible = ref(false);
     const userInfo = computed(() => userStore.userInfo);
-
+    const loginToken = computed(() => authStore.token);
     function showLoginDialog() {
       loginDialogVisible.value = true;
     }
@@ -61,7 +65,9 @@ export default defineComponent({
       loginDialogVisible.value = false;
     }
     function logout() {
+      authStore.removeToken()
       userStore.resetUserInfo();
+
       window.location.reload();
     }
     return {
@@ -75,6 +81,7 @@ export default defineComponent({
       registerClose,
       userInfo,
       showLevelDialog,
+      loginToken,
       levelClose
     };
   },

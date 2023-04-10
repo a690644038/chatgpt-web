@@ -36,8 +36,8 @@ function showLoginDialog() {
       </template>
     </div>
     <div class="flex-1 min-w-0 ml-2">
-      <h2 class="overflow-hidden font-bold text-md text-ellipsis whitespace-nowrap" v-if="userInfo.loginToken">
-        {{ userInfo.name ?? 'ChenZhaoYu' }}
+      <h2 class="overflow-hidden font-bold text-md text-ellipsis whitespace-nowrap" v-if="userInfo.name">
+        {{ userInfo.name ?? '-' }}
       </h2>
          <h2 class="font-bold text-md cus_p" v-else @click="showLoginDialog">
         未登录

@@ -18,8 +18,7 @@ import { fetchChatAPIProcess } from '@/api'
 import { t } from '@/locales'
 import { useSettingStore } from "@/store";
 import type { SettingsState } from "@/store/modules/settings/helper";
-import { useUserStore } from "@/store";
-const userStore = useUserStore();
+import { useAuthStore } from "@/store";
 
 const settingStore = useSettingStore();
 let controller = new AbortController()
@@ -62,8 +61,9 @@ dataSources.value.forEach((item, index) => {
 
 function handleSubmit() {
   const chatNum = ref(settingStore.chatNum ?? 0);
-  const userInfo = computed(() => userStore.userInfo);
-  if (chatNum.value >= 3&&!userInfo.value.loginToken) {
+  const authStore = useAuthStore()
+  const userInfo = computed(() => authStore.token);
+  if (chatNum.value >= 3&&!userInfo.value) {
     loginDialogVisible.value = true;
     return;
   }
@@ -388,8 +388,6 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function loginClose() {
-  console.log(345);
-  
   loginDialogVisible.value = false;
 }
 
@@ -398,8 +396,6 @@ function loginClose() {
 // }
 
 function showRegisterDialog() {
-  console.log(123);
-  
   registerDialogVisible.value = true;
 }
 function registerClose() {
