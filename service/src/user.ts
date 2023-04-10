@@ -138,7 +138,7 @@ router.post('/register', async (req, res) => {
       'secret-key',
       { expiresIn: '30d' }
     );
-
+    await pool.query('UPDATE users SET token = ? WHERE id = ?', [token, userId]);
     res.status(200).send(createResponseObj({
       avatar: null,
       username,
@@ -188,12 +188,13 @@ router.post('/login', async (req, res) => {
       'secret-key',
       { expiresIn: '30d' }
     );
+    await pool.query('UPDATE users SET token = ? WHERE id = ?', [token, user.id]);
 
     res.status(200).send(createResponseObj({
       avatar: user.avatar,
       username: user.username,
       token
-    }, 1, "注册成功"));
+    }, 1, "登录成功"));
 
   } catch (error) {
     res.sendStatus(500);

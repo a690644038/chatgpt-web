@@ -27,6 +27,7 @@
           @click="submitForm(ruleFormRef)">
           登录
         </el-button>
+        <div class="mar-t10">没有账号？<span class="regsty" @click="regNow()">立即注册</span></div>
       </div>
     </el-form>
   </el-dialog>
@@ -43,7 +44,8 @@ import type { UserInfo } from '@/store/modules/user/helper'
 import { ElMessage } from 'element-plus'
 let visible = ref(false);
 
-const emits = defineEmits(['close']);
+const emits = defineEmits(['close','register']);
+
 
 const userStore = useUserStore()
 // const userInfo = computed(() => userStore.userInfo)
@@ -128,7 +130,10 @@ const rules = reactive<FormRules>({
 //     }
 //   });
 // };
-
+function regNow(){
+  emits('register');
+  emits('close');
+}
 
 const submitForm = (ruleFormRef: FormInstance | undefined) => {
   if (!ruleFormRef) return;
@@ -155,13 +160,8 @@ const submitForm = (ruleFormRef: FormInstance | undefined) => {
       updateUserInfo({ loginToken })
       updateUserInfo({ name })
 
-      const userInfo = computed(() => userStore.userInfo)
 
-      const avatar2 = ref(userInfo.value.avatar ?? '')
 
-      const name2 = ref(userInfo.value.name ?? '')
-
-      console.log(avatar2,name2,'xcxc');
       
       if (code == 1) {
         ElMessage({
@@ -184,5 +184,9 @@ const submitForm = (ruleFormRef: FormInstance | undefined) => {
 <style scoped>
 h3 {
   margin-bottom: 20px;
+}
+.regsty{
+  cursor: pointer;
+  color: #409EFF;
 }
 </style>

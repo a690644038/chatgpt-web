@@ -97,11 +97,11 @@ interface Form {
 const emits = defineEmits(["close"]);
 
 const form = ref<Form>({
-  username: "lihh",
-  email: "690644038@qq.com",
-  verificationCode: "8a9i9",
-  password: "a123456",
-  confirmPassword: "a123456",
+  username: "",
+  email: "",
+  verificationCode: "",
+  password: "",
+  confirmPassword: "",
 });
 
 type Rule = Partial<{

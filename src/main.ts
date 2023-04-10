@@ -8,6 +8,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import LoginDialog from './components/common/LoginDialog/index.vue';
 import Register from './components/common/Register/index.vue';
+import Level from './components/common/Level/index.vue';
 import Head from './components/common/Head/index.vue';
 import './styles/common.css'
 async function bootstrap() {
@@ -21,9 +22,10 @@ async function bootstrap() {
   setupI18n(app)
 
   await setupRouter(app)
-  app.component('login-dialog', LoginDialog); // 注册 LoginDialog 组件
-  app.component('register-dialog', Register); // 注册 LoginDialog 组件
-  app.component('Head', Head); // 注册 Head 组件
+  app.component('login-dialog', LoginDialog);
+  app.component('register-dialog', Register); 
+  app.component('level-dialog', Level); 
+  app.component('Head', Head); 
   app.use(ElementPlus)
   app.mount('#app')
 }

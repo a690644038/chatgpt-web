@@ -4,20 +4,22 @@
       <img src="@/assets/logo.png" style="height: 60px" alt="Logo" />
       <span class="logoText">BotMind</span>
     </div>
-    <!-- <div class="menu">
-      <el-button type="text" class="PrimaryTextColor">首页</el-button>
-      <el-button type="text" class="PrimaryTextColor">产品中心</el-button>
-      <el-button type="text" class="PrimaryTextColor">关于我们</el-button>
-    </div> -->
+    <div class="menu">
+      <!-- <el-button type="text" class="PrimaryTextColor">购买会员</el-button> -->
+    </div>
     <div class="actions">
+      <el-button type="text" @click="showLevelDialog" >
+        <img src="@/assets/vip.png" class="vipimg" alt="" srcset="">
+        升级会员</el-button>
       <span v-if="!userInfo.loginToken">
         <el-button type="text" @click="showLoginDialog">登录</el-button>
         <el-button type="primary" @click="showRegisterDialog">注册</el-button>
       </span>
       <el-button v-else type="text" @click="logout">退出</el-button>
     </div>
-    <login-dialog v-model="loginDialogVisible" @close="loginClose" />
+    <login-dialog v-model="loginDialogVisible" @close="loginClose" @register="showRegisterDialog" />
     <register-dialog v-model="registerDialogVisible" @close="registerClose" />
+    <level-dialog v-model="levelDialogVisible" @close="levelClose"/>
   </div>
 </template>
   
@@ -36,10 +38,14 @@ export default defineComponent({
   setup() {
     const loginDialogVisible = ref(false);
     const registerDialogVisible = ref(false);
+    const levelDialogVisible = ref(false);
     const userInfo = computed(() => userStore.userInfo);
 
     function showLoginDialog() {
       loginDialogVisible.value = true;
+    }
+    function showLevelDialog() {
+      levelDialogVisible.value = true;
     }
 
     function showRegisterDialog() {
@@ -47,6 +53,9 @@ export default defineComponent({
     }
     function registerClose() {
       registerDialogVisible.value = false;
+    }
+    function levelClose() {
+      levelDialogVisible.value = false;
     }
     function loginClose() {
       loginDialogVisible.value = false;
@@ -58,12 +67,15 @@ export default defineComponent({
     return {
       loginDialogVisible,
       registerDialogVisible,
+      levelDialogVisible,
       showLoginDialog,
       loginClose,
       showRegisterDialog,
       logout,
       registerClose,
-      userInfo
+      userInfo,
+      showLevelDialog,
+      levelClose
     };
   },
 });
@@ -83,7 +95,10 @@ export default defineComponent({
   background: #fff;
   top: 0;
 }
-
+.vipimg{
+  width: 20px;
+  margin-right: 5px;
+}
 .menu {
   display: flex;
   gap: 20px;
