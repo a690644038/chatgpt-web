@@ -100,6 +100,7 @@ router.post('/register', async (req, res) => {
     return res.status(200).send(createResponseObj({}, 0, "邮箱格式不正确"));
   }
 
+
   try {
     // 检查邮箱是否已被注册
     const [existingUser] = await pool.query(

@@ -109,8 +109,8 @@ router.post('/playment', async (req, res, next) => {
   const formData = new AlipayFormData();
   formData.setMethod('get')
   // //支付成功后自动跳转的页面
-  formData.addField('returnUrl', 'https://chat.workwps.com');
-  formData.addField('notify_url', 'https://chat.workwps.com/api/pay/queryOrder');
+  formData.addField('returnUrl', 'http://chat.workwps.com');
+  formData.addField('notify_url', 'http://chat.workwps.com/api/pay/queryOrder');
   formData.addField('bizContent', {
     outTradeNo: orderId, // 订单号
     productCode: 'FAST_INSTANT_TRADE_PAY', //商品销售码
