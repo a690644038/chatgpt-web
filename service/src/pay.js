@@ -19,7 +19,7 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 // 查询订单是否交易成功
-router.get('/queryOrder', function (req, res, next) {
+router.post('/queryOrder', function (req, res, next) {
   //参数
   console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
   console.log(req);
