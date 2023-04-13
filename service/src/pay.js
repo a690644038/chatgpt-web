@@ -123,10 +123,10 @@ router.post('/playment',function(req,res,next){
 
 router.get('/membership-level', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM membership_level');
+    const [list] = await pool.query('SELECT * FROM membership_level');
     
     res.status(200).send(createResponseObj({
-      rows
+      list
     }, 1, "操作成功"));
   } catch (error) {
     console.error(error);

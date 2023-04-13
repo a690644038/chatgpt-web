@@ -19,15 +19,15 @@
           active: selectedPlan === item.type,
           'plan-item-xs': isMobile,
         }"
-        v-for="(item,index) of memberList"
+        v-for="(item, index) of memberList"
         :key="index"
         @click="selectPlan(item.type)"
       >
         <div class="plan-name">
           <img src="@/assets/vip.png" class="vipimg" alt="" srcset="" />
-          <span>{{item.label}}</span>
+          <span>{{ item.name }}</span>
         </div>
-        <div class="plan-price">{{item.price}}元/{{item.unit }}</div>
+        <div class="plan-price">{{ item.price }}元/{{ item.unit }}</div>
       </div>
     </div>
 
@@ -44,20 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits,onMounted } from "vue";
+import { ref, defineEmits, onMounted } from "vue";
 import { useBasicLayout } from "@/hooks/useBasicLayout";
-import { getMembership } from "@/api";
+import { getMembership,pay } from "@/api";
 
 const emits = defineEmits(["close"]);
 const dialogVisible = ref(false);
 const selectedPlan = ref("");
-interface member {
-  label: string
-  type: string
-  price: number
-  unit: string
-}
-const memberList = ref<member[]>([])
 
 const selectPlan = (plan: string) => {
   selectedPlan.value = plan;
@@ -65,20 +58,32 @@ const selectPlan = (plan: string) => {
 const confirmUpgrade = () => {
   // 执行升级操作
   // dialogVisible.value = false;
+  pay({}).then((response)=>{
+    const data = response as {result?: string };
+    window.open(data?.result)
+  })
   emits("close");
 };
 const { isMobile } = useBasicLayout();
 
+interface member {
+  name: string;
+  type: string;
+  price: number;
+  unit: string;
+}
 
-function getMembershipList(){
-  getMembership().then((res)=>{
-    memberList.value = res.data as member[]
-  })
+const memberList = ref<member[]>([]);
+
+function getMembershipList() {
+  getMembership().then((res) => {
+    memberList.value = (res.data as {list: member[]} | undefined)?.list || []
+  });
 }
 
 onMounted(() => {
-  getMembershipList()
-})
+  getMembershipList();
+});
 </script>
 
 <style scoped>
