@@ -14,7 +14,7 @@ const pool = require('../db');
 const app = express()
 const router = express.Router()
 
-app.use(express.static('public'))
+app.use(express.static('dist'))
 app.use(express.json())
 
 app.all('*', (_, res, next) => {
