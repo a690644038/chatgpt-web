@@ -44,6 +44,7 @@ export default defineConfig((env) => {
       },
     },
     build: {
+      outDir: './service/dist',
       reportCompressedSize: false,
       sourcemap: false,
       commonjsOptions: {
