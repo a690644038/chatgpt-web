@@ -30,3 +30,4 @@ coverage
 *.zip
 # Environment variables files
 # /service/.env
+service/.env
