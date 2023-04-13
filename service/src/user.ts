@@ -1,11 +1,8 @@
 import express from 'express'
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 // const app = express()
+const { pool, bcrypt,jwt  } = require('./utils/common');
 const router = express.Router()
 const nodemailer = require('nodemailer');
-const pool = require('../db');
-
 
 const transporter = nodemailer.createTransport({
   host: "smtp.163.com", // 邮箱服务商的 SMTP 地址

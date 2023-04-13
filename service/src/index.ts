@@ -7,9 +7,7 @@ import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 import user from 'src/user'
 import pay from 'src/pay'
-
-const jwt = require('jsonwebtoken');
-const pool = require('../db');
+const { checkLevelTime  } = require('./utils/common');
 
 const app = express()
 const router = express.Router()
@@ -24,30 +22,6 @@ app.all('*', (_, res, next) => {
   next()
 })
 
-async function checkLevelTime(token) {
-
-  try {
-    const decodedToken = jwt.verify(token, 'secret-key');
-    const [user] = await pool.query(
-      'SELECT * FROM users WHERE id = ? LIMIT 1',
-      [decodedToken.userId]
-    );
-    
-    if (!user.length) {
-      return { success: false, message: "请登录！" };
-    }
-
-    const levelTime = new Date(user[0].levelTime).getTime();
-    if (levelTime < Date.now()) {
-      return { success: false, message: "会员已过期" };
-    } else {
-      return { success: true, message: "Leveltime is not passed yet" };
-    }
-  } catch (error) {
-    console.error(error);
-    return { success: false, message: error.message };
-  }
-}
 
 
 router.post('/chat-process', [auth, limiter], async (req, res) => {
@@ -141,10 +115,10 @@ app.use((req, res, next) => {
 
 app.use('', router)
 app.use('/api', router)
-app.use('/api/user', user)
-app.use('/api/pay', pay)
-// app.use('/user', user)
-// app.use('/pay', pay)
+// app.use('/api/user', user)
+// app.use('/api/pay', pay)
+app.use('/user', user)
+app.use('/pay', pay)
 app.set('trust proxy', 1)
 
 app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))

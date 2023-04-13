@@ -58,7 +58,7 @@ const selectPlan = (plan: string) => {
 const confirmUpgrade = () => {
   // 执行升级操作
   // dialogVisible.value = false;
-  pay({}).then((response)=>{
+  pay({type:selectedPlan.value}).then((response)=>{
     const data = response as {result?: string };
     window.open(data?.result)
   })
