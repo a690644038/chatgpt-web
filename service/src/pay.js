@@ -19,8 +19,11 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 // 查询订单是否交易成功
-router.post('/queryOrder', function (req, res, next) {
+router.get('/queryOrder', function (req, res, next) {
   //参数
+  console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+  console.log(req);
+  console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
   let out_trade_no = req.body.out_trade_no //订单号
   let trade_no = req.body.trade_no //支付宝交易号
   //对接支付宝
@@ -87,6 +90,9 @@ router.post('/queryOrder', function (req, res, next) {
 
 })
 
+
+
+
 // 向支付宝请求支付
 router.post('/playment', async (req, res, next) => {
   //订单号
@@ -104,7 +110,7 @@ router.post('/playment', async (req, res, next) => {
   formData.setMethod('get')
   // //支付成功后自动跳转的页面
   formData.addField('returnUrl', 'https://chat.workwps.com');
-
+  formData.addField('notify_url', 'https://chat.workwps.com/queryOrder');
   formData.addField('bizContent', {
     outTradeNo: orderId, // 订单号
     productCode: 'FAST_INSTANT_TRADE_PAY', //商品销售码
