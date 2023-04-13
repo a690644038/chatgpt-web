@@ -1,5 +1,9 @@
 <template>
-  <el-dialog :visible.sync="dialogVisible" title="升级会员" >
+  <el-dialog
+    :visible.sync="dialogVisible"
+    title="升级会员"
+    :width="isMobile ? '300px' : '700px'"
+  >
     <div class="upgrade-desc">
       <ul class="bluetext">
         <li>国内直接访问</li>
@@ -11,36 +15,19 @@
     <div class="upgrade-plan">
       <div
         class="plan-item"
-        :class="{ active: selectedPlan === 'monthly' }"
-        @click="selectPlan('monthly')"
+        :class="{
+          active: selectedPlan === item.type,
+          'plan-item-xs': isMobile,
+        }"
+        v-for="(item,index) of memberList"
+        :key="index"
+        @click="selectPlan(item.type)"
       >
         <div class="plan-name">
           <img src="@/assets/vip.png" class="vipimg" alt="" srcset="" />
-          <span>包月</span>
+          <span>{{item.label}}</span>
         </div>
-        <div class="plan-price">15元/月</div>
-      </div>
-      <div
-        class="plan-item"
-        :class="{ active: selectedPlan === 'annual' }"
-        @click="selectPlan('annual')"
-      >
-        <div class="plan-name">
-          <img src="@/assets/vip.png" class="vipimg" alt="" srcset="" />
-          <span>包年</span>
-        </div>
-        <div class="plan-price">130元/年</div>
-      </div>
-      <div
-        class="plan-item"
-        :class="{ active: selectedPlan === 'seasonal' }"
-        @click="selectPlan('seasonal')"
-      >
-        <div class="plan-name">
-          <img src="@/assets/vip.png" class="vipimg" alt="" srcset="" />
-          <span>包季</span>
-        </div>
-        <div class="plan-price">50元/季</div>
+        <div class="plan-price">{{item.price}}元/{{item.unit }}</div>
       </div>
     </div>
 
@@ -57,11 +44,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from "vue";
+import { ref, defineEmits,onMounted } from "vue";
+import { useBasicLayout } from "@/hooks/useBasicLayout";
+import { getMembership } from "@/api";
 
 const emits = defineEmits(["close"]);
 const dialogVisible = ref(false);
 const selectedPlan = ref("");
+interface member {
+  label: string
+  type: string
+  price: number
+  unit: string
+}
+const memberList = ref<member[]>([])
+
 const selectPlan = (plan: string) => {
   selectedPlan.value = plan;
 };
@@ -70,14 +67,25 @@ const confirmUpgrade = () => {
   // dialogVisible.value = false;
   emits("close");
 };
+const { isMobile } = useBasicLayout();
 
 
+function getMembershipList(){
+  getMembership().then((res)=>{
+    memberList.value = res.data as member[]
+  })
+}
+
+onMounted(() => {
+  getMembershipList()
+})
 </script>
 
 <style scoped>
 .upgrade-plan {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
 }
 .plan-item {
   width: 30%;
@@ -86,6 +94,10 @@ const confirmUpgrade = () => {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+.plan-item-xs {
+  width: 100%;
+  margin-bottom: 10px;
 }
 .plan-item:hover {
   border-color: #409eff;
@@ -99,9 +111,9 @@ const confirmUpgrade = () => {
   font-size: 18px;
   margin-bottom: 10px;
   display: flex;
- align-items: center;
+  align-items: center;
 }
-.plan-name img{
+.plan-name img {
   height: 20px;
   margin-right: 5px;
 }

@@ -1,5 +1,5 @@
 import type { AxiosProgressEvent, GenericAbortSignal } from 'axios'
-import { post } from '@/utils/request'
+import { post,get } from '@/utils/request'
 import { useAuthStore, useSettingStore } from '@/store'
 
 export function fetchChatAPI<T = any>(
@@ -96,5 +96,20 @@ export function sendEmail<T>(data:any) {
   return post<T>({
     url: '/user/send-verification-code',
     data
+  })
+}
+
+
+export function pay<T>(data:any) {
+  return post<T>({
+    url: '/pay/playment',
+    data
+  })
+}
+
+
+export function getMembership<T>(){
+  return get<T>({
+    url: '/pay/membership-level',
   })
 }

@@ -66,6 +66,7 @@
           color="#303133"
           >注册</el-button
         >
+
       </div>
     </el-form>
   </el-dialog>
@@ -188,7 +189,12 @@ function handleSendCode() {
     })
     .catch((error) => {});
 }
-
+// function pays(){
+//   pay({}).then((response)=>{
+//     const data = response as {result?: string };
+//     window.open(data?.result)
+//   })
+// }
 // const submitForm = async (ruleFormRef: FormInstance | undefined) => {
 //   if (!ruleFormRef) return;
 //   await ruleFormRef.validate(async (valid, fields) => {

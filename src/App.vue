@@ -4,9 +4,11 @@ import { NConfigProvider } from 'naive-ui'
 import { NaiveProvider } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useBasicLayout } from '@/hooks/useBasicLayout'
 
 const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
+const { isMobile } = useBasicLayout()
 
 // const dialogVisible = ref(false);
 // const registerVisible = ref(false);
@@ -26,7 +28,7 @@ const { language } = useLanguage()
   <Head></Head>
   <NConfigProvider
     class="h-full"
-    style="padding-top: 100px;"
+    :style="[isMobile?'padding-top: 52px':'padding-top: 100px']"
     :theme="theme"
     :theme-overrides="themeOverrides"
     :locale="language"

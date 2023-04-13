@@ -25,7 +25,19 @@ export function useTheme() {
         common: {},
       }
     }
-    return {}
+    return {
+      common: {
+        // primaryColor: '#4098FC',
+        // buttonColor2Hover: "#4098FC",
+        // buttonColor2Pressed: "rgba(46, 51, 56, .13)",
+        // primaryColorHover: '#4098FC',
+        // primaryColorPressed: '#4098FC',
+        // successColor: "#4098FC",
+        // borderColor:"#4098FC",
+        // iconColor:"#4098FC"
+        // primaryColorSuppl: '#4098FC'
+      }
+    }
   })
 
   watch(

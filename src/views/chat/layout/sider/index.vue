@@ -13,6 +13,7 @@ const chatStore = useChatStore()
 
 const { isMobile } = useBasicLayout()
 const show = ref(false)
+console.log(isMobile.value,'xcxc');
 
 const collapsed = computed(() => appStore.siderCollapsed)
 

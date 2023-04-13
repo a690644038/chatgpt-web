@@ -35,7 +35,7 @@
 
 <script setup lang='ts'>
 
-import { reactive, computed, ref,defineEmits } from "vue";
+import { reactive, ref,defineEmits } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { fetchLogin } from '@/api'
 import { User, Lock } from '@element-plus/icons-vue'

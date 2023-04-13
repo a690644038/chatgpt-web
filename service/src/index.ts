@@ -6,6 +6,8 @@ import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 import user from 'src/user'
+import pay from 'src/pay'
+
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
 
@@ -140,6 +142,7 @@ app.use((req, res, next) => {
 app.use('', router)
 app.use('/api', router)
 app.use('/user', user)
+app.use('/pay', pay)
 app.set('trust proxy', 1)
 
 app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
