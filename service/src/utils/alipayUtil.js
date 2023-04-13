@@ -1,7 +1,8 @@
 const AlipaySdk= require('alipay-sdk').default;
 
 const alipaySdk = new AlipaySdk({
-    appId:'2021000119626533',
+    // appId:'2021000119626533',
+    appId:'2021003188619125',
     signType:'RSA2', //算法签名
     // gateway:'https://openapi.alipaydev.com/gateway.do', //沙箱支付宝网关地址
     gateway:'https://openapi.alipay.com/gateway.do',//支付宝网关地址
