@@ -64,7 +64,7 @@
           @click="submitForm(ruleFormRef)"
           dark
           color="#303133"
-          >注册</el-button
+          >注册2</el-button
         >
       </div>
     </el-form>
