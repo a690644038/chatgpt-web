@@ -20,6 +20,11 @@ router.get('/', function (req, res, next) {
 });
 // 查询订单是否交易成功
 router.post('/queryOrder', function (req, res, next) {
+  console.log('xxxxxxxxxx');
+
+  console.log(req);
+
+  console.log('xxxxxxxxxx');
   //参数
   let out_trade_no = req.body.out_trade_no //订单号
   let trade_no = req.body.trade_no //支付宝交易号
