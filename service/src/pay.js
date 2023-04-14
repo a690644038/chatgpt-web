@@ -21,9 +21,6 @@ router.get('/', function (req, res, next) {
 // 查询订单是否交易成功
 router.post('/queryOrder', function (req, res, next) {
   //参数
-  console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-  console.log(req);
-  console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
   let out_trade_no = req.body.out_trade_no //订单号
   let trade_no = req.body.trade_no //支付宝交易号
   //对接支付宝
@@ -43,7 +40,7 @@ router.post('/queryOrder', function (req, res, next) {
     axios({
       url: resData,
       method: 'get',
-    }).then(data => {
+    }).then(async data => {
       let r = data.data.alipay_trade_query_response;
       console.log(r)
       if (r.code === '10000') {
@@ -63,11 +60,31 @@ router.post('/queryOrder', function (req, res, next) {
             })
             break;
           case 'TRADE_SUCCESS':
-            res.send({
-              success: 'true',
-              code: 200,
-              msg: '交易完成'
-            })
+            const conn = await pool.getConnection();
+            try {
+              //查询订单是否存在
+              const [orderList] = await conn.query('SELECT * FROM order_list WHERE order_no = ?', [out_trade_no]);
+              if (orderList.length > 0) {
+                await conn.query('UPDATE order_list SET status = 1 WHERE order_no = ?', [out_trade_no]);
+                res.send({
+                  success: 'true',
+                  code: 200,
+                  msg: '交易完成'
+                })
+              } else {
+                res.json({
+                  msg: '该订单不存在'
+                })
+              }
+            } catch (e) {
+              console.error(e);
+              res.json({
+                msg: '查询订单失败',
+                err: e
+              });
+            } finally {
+              conn.release();
+            }
             break;
           case 'TRADE_CLOSED':
             res.send({
@@ -128,7 +145,7 @@ router.post('/playment', async (req, res, next) => {
 
   result.then(async (resp) => {
     const time = new Date(timestamp)
-    await pool.query('INSERT INTO order_list (user_id, order_date, total_amount, order_id, status, prd_name) VALUES (?, ?, ?, ?, ?, ?)',
+    await pool.query('INSERT INTO order_list (user_id, order_date, total_amount, order_no, status, prd_name) VALUES (?, ?, ?, ?, ?, ?)',
       [userInfo.id, time, levelInfo.price, orderId, 0, levelInfo.name]
     )
     res.send({
