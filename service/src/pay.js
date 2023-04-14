@@ -87,14 +87,14 @@ router.post('/queryOrder', function (req, res, next) {
                 const [result] = await conn.query('UPDATE order_list SET status = 1 WHERE order_no = ?', [out_trade_no]);
                 if (result.affectedRows === 1) {
                   // 订单状态更新成功
-                  const [{ userID }] = orderList;
+                  const [{ user_id }] = orderList;
                   const [{ prd_name }] = orderList;
-                  const [[user]] = await conn.query('SELECT * FROM user WHERE id = ?', [userID]);
+                  const [[user]] = await conn.query('SELECT * FROM user WHERE id = ?', [user_id]);
                   if (user) {
                     let levelTime = user.levelTime ? new Date(user.levelTime) : new Date();
                     const [[day]] = await conn.query('SELECT * FROM membership_level WHERE id = ?', [prd_name]);
                     levelTime.setDate(levelTime.getDate() + day);
-                    const updateResult = await conn.query('UPDATE user SET levelTime = ? WHERE id = ?', [levelTime, userID]);
+                    const updateResult = await conn.query('UPDATE user SET levelTime = ? WHERE id = ?', [levelTime, user_id]);
                     if (updateResult.affectedRows === 1) {
                       res.json({
                         success: true,
