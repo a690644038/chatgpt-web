@@ -49,56 +49,163 @@ router.post('/queryOrder', function (req, res, next) {
       let r = data.data.alipay_trade_query_response;
       console.log(r)
       if (r.code === '10000') {
-        switch (r.trade_status) {
-          case 'WAIT_BUYER_PAY':
-            res.send({
-              success: 'true',
-              code: 200,
-              msg: '支付宝有交易记录，没付款'
-            })
-            break;
-          case 'TRADE_FINISHED':
-            res.send({
-              success: 'true',
-              code: 200,
-              msg: '交易完成，不可以退款'
-            })
-            break;
-          case 'TRADE_SUCCESS':
-            const conn = await pool.getConnection();
-            try {
+        let conn;
+        try {
+          conn = await pool.getConnection();
+          const [orderList] = await conn.query('SELECT * FROM order_list WHERE order_no = ?', [out_trade_no]);
+          switch (r.trade_status) {
+            case 'WAIT_BUYER_PAY':
+              res.send({
+                success: 'true',
+                code: 200,
+                msg: '支付宝有交易记录，没付款'
+              })
+              break;
+            case 'TRADE_FINISHED':
+              res.send({
+                success: 'true',
+                code: 200,
+                msg: '交易完成，不可以退款'
+              })
+              break;
+            case 'TRADE_SUCCESS':
               //查询订单是否存在
-              const [orderList] = await conn.query('SELECT * FROM order_list WHERE order_no = ?', [out_trade_no]);
+              // if (orderList.length > 0) {
+              //   await conn.query('UPDATE order_list SET status = 1 WHERE order_no = ?', [out_trade_no]);
+              //   res.send({
+              //     success: 'true',
+              //     code: 200,
+              //     msg: '交易完成'
+              //   })
+              // } else {
+              //   res.json({
+              //     msg: '该订单不存在'
+              //   })
+              // }
+
               if (orderList.length > 0) {
-                await conn.query('UPDATE order_list SET status = 1 WHERE order_no = ?', [out_trade_no]);
+                const [result] = await conn.query('UPDATE order_list SET status = 1 WHERE order_no = ?', [out_trade_no]);
+                if (result.affectedRows === 1) {
+                  // 订单状态更新成功
+                  const [{ userID }] = orderList;
+                  const [{ prd_name }] = orderList;
+                  const [[user]] = await conn.query('SELECT * FROM user WHERE id = ?', [userID]);
+                  if (user) {
+                    let levelTime = user.levelTime ? new Date(user.levelTime) : new Date();
+                    const [[day]] = await conn.query('SELECT * FROM membership_level WHERE id = ?', [prd_name]);
+                    levelTime.setDate(levelTime.getDate() + day);
+                    const updateResult = await conn.query('UPDATE user SET levelTime = ? WHERE id = ?', [levelTime, userID]);
+                    if (updateResult.affectedRows === 1) {
+                      res.json({
+                        success: true,
+                        code: 200,
+                        msg: '交易完成'
+                      });
+                    } else {
+                      res.json({
+                        success: false,
+                        code: 500,
+                        msg: '用户等级时间更新失败'
+                      });
+                    }
+                  } else {
+                    res.json({
+                      success: false,
+                      code: 500,
+                      msg: '该用户不存在'
+                    });
+                  }
+                } else {
+                  res.json({
+                    success: false,
+                    code: 500,
+                    msg: '订单状态更新失败'
+                  });
+                }
+              } else {
+                res.json({
+                  success: false,
+                  code: 500,
+                  msg: '该订单不存在'
+                });
+              }
+
+              break;
+            case 'TRADE_CLOSED':
+              //查询订单是否存在
+              if (orderList.length > 0) {
+                await conn.query('UPDATE order_list SET status = 2 WHERE order_no = ?', [out_trade_no]);
                 res.send({
                   success: 'true',
                   code: 200,
-                  msg: '交易完成'
+                  msg: '交易关闭'
                 })
               } else {
                 res.json({
                   msg: '该订单不存在'
                 })
               }
-            } catch (e) {
-              console.error(e);
-              res.json({
-                msg: '查询订单失败',
-                err: e
-              });
-            } finally {
-              conn.release();
-            }
-            break;
-          case 'TRADE_CLOSED':
-            res.send({
-              success: 'true',
-              code: 200,
-              msg: '交易关闭，没有支付成功'
-            })
-            break;
+              break;
+          }
+        } catch (e) {
+          console.error(e);
+          res.json({
+            msg: '查询订单失败',
+            err: e
+          });
+        } finally {
+          if (conn) conn.release();
         }
+        // switch (r.trade_status) {
+        //   case 'WAIT_BUYER_PAY':
+        //     res.send({
+        //       success: 'true',
+        //       code: 200,
+        //       msg: '支付宝有交易记录，没付款'
+        //     })
+        //     break;
+        //   case 'TRADE_FINISHED':
+        //     res.send({
+        //       success: 'true',
+        //       code: 200,
+        //       msg: '交易完成，不可以退款'
+        //     })
+        //     break;
+        //   case 'TRADE_SUCCESS':
+        //     const conn = await pool.getConnection();
+        //     try {
+        //       //查询订单是否存在
+        //       const [orderList] = await conn.query('SELECT * FROM order_list WHERE order_no = ?', [out_trade_no]);
+        //       if (orderList.length > 0) {
+        //         await conn.query('UPDATE order_list SET status = 1 WHERE order_no = ?', [out_trade_no]);
+        //         res.send({
+        //           success: 'true',
+        //           code: 200,
+        //           msg: '交易完成'
+        //         })
+        //       } else {
+        //         res.json({
+        //           msg: '该订单不存在'
+        //         })
+        //       }
+        //     } catch (e) {
+        //       console.error(e);
+        //       res.json({
+        //         msg: '查询订单失败',
+        //         err: e
+        //       });
+        //     } finally {
+        //       conn.release();
+        //     }
+        //     break;
+        //   case 'TRADE_CLOSED':
+        //     res.send({
+        //       success: 'true',
+        //       code: 200,
+        //       msg: '交易关闭，没有支付成功'
+        //     })
+        //     break;
+        // }
       } else if (r.code === '40004') {
         res.json('交易不存在')
       }
