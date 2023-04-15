@@ -11,6 +11,10 @@ const { checkLevelTime  } = require('./utils/common');
 
 const app = express()
 const router = express.Router()
+const isDev = process.env.NODE_ENV === 'development';
+
+// 定义路由前缀
+const prefix = isDev ? '' : '/api';
 
 app.use(express.static('dist'))
 app.use(express.json())
@@ -117,8 +121,8 @@ app.use('', router)
 app.use('/api', router)
 // app.use('/api/user', user)
 // app.use('/api/pay', pay)
-app.use('/user', user)
-app.use('/pay', pay)
+app.use(prefix+'/user', user)
+app.use(prefix+'/pay', pay)
 app.set('trust proxy', 1)
 
 app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
