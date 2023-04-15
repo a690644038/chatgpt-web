@@ -89,18 +89,19 @@ router.post('/queryOrder', function (req, res, next) {
                   // 订单状态更新成功
                   const [{ user_id }] = orderList;
                   const [{ prd_name }] = orderList;
-                  const [[user]] = await conn.query('SELECT * FROM user WHERE id = ?', [user_id]);
+                  const [[user]] = await conn.query('SELECT * FROM users WHERE id = ?', [user_id]);
                   if (user) {
-                    let levelTime = user.levelTime ? new Date(user.levelTime) : new Date();
-                    const [[day]] = await conn.query('SELECT * FROM membership_level WHERE id = ?', [prd_name]);
-                    levelTime.setDate(levelTime.getDate() + day);
-                    const updateResult = await conn.query('UPDATE user SET levelTime = ? WHERE id = ?', [levelTime, user_id]);
+                    let levelTime = user.levelTime != null ? new Date(user.levelTime) : new Date();
+                    const [[membershipData]] = await conn.query('SELECT * FROM membership_level WHERE name = ?', [prd_name]);
+                    levelTime.setDate(levelTime.getDate() + Number(membershipData.day));
+                    const [updateResult] = await conn.query('UPDATE users SET levelTime = ? WHERE id = ?', [levelTime, user_id]);
                     if (updateResult.affectedRows === 1) {
                       res.json({
                         success: true,
                         code: 200,
                         msg: '交易完成'
                       });
+
                     } else {
                       res.json({
                         success: false,
@@ -129,7 +130,6 @@ router.post('/queryOrder', function (req, res, next) {
                   msg: '该订单不存在'
                 });
               }
-
               break;
             case 'TRADE_CLOSED':
               //查询订单是否存在
