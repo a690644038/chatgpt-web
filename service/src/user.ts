@@ -1,6 +1,6 @@
 import express from 'express'
 // const app = express()
-const { pool, bcrypt,jwt  } = require('./utils/common');
+const { pool, bcrypt, jwt } = require('./utils/common');
 const router = express.Router()
 const nodemailer = require('nodemailer');
 
@@ -115,7 +115,10 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 插入用户数据并更新用户 token
-    const levelTime = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    // const levelTime = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const now = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const isoString = now.toISOString();
+    const levelTime = isoString.replace('T', ' ').slice(0, -5);
     const [result] = await pool.query(
       'INSERT INTO users (email, username, password, token, levelTime) VALUES (?, ?, ?, ?, ?)',
       [email, username, hashedPassword, '', levelTime]
@@ -174,7 +177,7 @@ router.post('/login', async (req, res) => {
       return res.status(200).send(createResponseObj({}, 0, "用户名或密码错误"));
 
     }
-   
+
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       'secret-key',
@@ -185,7 +188,7 @@ router.post('/login', async (req, res) => {
     res.status(200).send(createResponseObj({
       avatar: user.avatar,
       username: user.username,
-      levelTime:user.levelTime,
+      levelTime: user.levelTime,
       token,
     }, 1, "登录成功"));
 
