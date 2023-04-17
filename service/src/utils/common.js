@@ -27,7 +27,7 @@ async function checkLevelTime(token) {
     }
 }
 
-async function getUserData(token){
+async function getUserData(token) {
     try {
         const decodedToken = jwt.verify(token, 'secret-key');
         const [user] = await pool.query(
@@ -45,10 +45,35 @@ async function getUserData(token){
     }
 }
 
+async function getOpenAiKey() {
+    // 创建数据库连接池
+    try {
+        // 从连接池中获取一个连接
+        const conn = await pool.getConnection();
+
+        // 执行 SQL 查询
+        const [rows] = await conn.query('SELECT * FROM open_ai_key');
+
+        // 释放连接
+        conn.release();
+
+        // 返回查询结果
+        return rows;
+    } catch (err) {
+        console.error(err);
+    } finally {
+        // 最后记得关闭连接池
+        pool.end();
+    }
+}
+
+
+
 module.exports = {
     bcrypt,
     jwt,
     pool,
     checkLevelTime,
-    getUserData
+    getUserData,
+    getOpenAiKey,
 };

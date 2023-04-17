@@ -15,6 +15,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 // 定义路由前缀
 const prefix = isDev ? '' : '/api';
+console.log(chatReplyProcess);
 
 app.use(express.static('dist'))
 app.use(express.json())
