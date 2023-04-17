@@ -5,7 +5,7 @@ import { ChatGPTAPI, ChatGPTUnofficialProxyAPI } from 'chatgpt'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import httpsProxyAgent from 'https-proxy-agent'
 import fetch from 'node-fetch'
-import { sendResponse } from '../utils'
+import { loadBalancer, parseKeys, sendResponse, sleep } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
 import type { RequestOptions, SetProxyOptions, UsageResponse } from './types'
@@ -35,15 +35,38 @@ if (!isNotEmptyString(process.env.OPENAI_API_KEY) && !isNotEmptyString(process.e
 
 let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
+
+
+// ****************多key****************
+const apikeys =parseKeys(process.env.OPENAI_API_KEY) 
+const accessTokens = parseKeys(process.env.OPENAI_ACCESS_TOKEN)
+console.log(apikeys);
+// 为提高性能，预先计算好能预先计算好的
+// 该实现不支持中途切换 API 模型
+const nextKey = (() => {
+  if (apikeys.length) {
+    const next = loadBalancer(apikeys)
+    return () => (api as ChatGPTAPI).apiKey = next()
+  }
+  else {
+    const next = loadBalancer(accessTokens)
+    return () => (api as ChatGPTUnofficialProxyAPI).accessToken = next()
+  }
+})()
+const maxRetry: number = !isNaN(+process.env.MAX_RETRY) ? +process.env.MAX_RETRY : Math.max(apikeys.length, accessTokens.length)
+const retryIntervalMs = !isNaN(+process.env.RETRY_INTERVAL_MS) ? +process.env.RETRY_INTERVAL_MS : 1000;
+// ****************多key****************
+
 (async () => {
   // More Info: https://github.com/transitive-bullshit/chatgpt-api
   const openAiKeys = await getOpenAiKey();
-  console.log(openAiKeys);
+  // console.log(openAiKeys);
   if (isNotEmptyString(process.env.OPENAI_API_KEY)) {
     const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
 
     const options: ChatGPTAPIOptions = {
-      apiKey: process.env.OPENAI_API_KEY,
+      // apiKey: process.env.OPENAI_API_KEY,
+      apiKey:"-",
       completionParams: { model },
       debug: !disableDebug,
     }
@@ -71,7 +94,8 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
   }
   else {
     const options: ChatGPTUnofficialProxyAPIOptions = {
-      accessToken: process.env.OPENAI_ACCESS_TOKEN,
+      // accessToken: process.env.OPENAI_ACCESS_TOKEN,
+      accessToken:'-',
       apiReverseProxyUrl: isNotEmptyString(process.env.API_REVERSE_PROXY) ? process.env.API_REVERSE_PROXY : 'https://bypass.churchless.tech/api/conversation',
       model,
       debug: !disableDebug,
@@ -102,12 +126,29 @@ async function chatReplyProcess(options: RequestOptions) {
         options = { ...lastContext }
     }
 
-    const response = await api.sendMessage(message, {
-      ...options,
-      onProgress: (partialResponse) => {
-        process?.(partialResponse)
-      },
-    })
+    // const response = await api.sendMessage(message, {
+    //   ...options,
+    //   onProgress: (partialResponse) => {
+    //     process?.(partialResponse)
+    //   },
+    // })
+
+
+    if (process)
+      options.onProgress = process
+
+    let retryCount = 0
+    let response: ChatMessage | void
+
+    while (!response && retryCount++ < maxRetry) {
+      nextKey()
+      response = await api.sendMessage(message, options).catch((error: any) => {
+        // 429 Too Many Requests
+        if (error.statusCode !== 429)
+          throw error
+      })
+      await sleep(retryIntervalMs)
+    }
 
     return sendResponse({ type: 'Success', data: response })
   }
@@ -121,6 +162,8 @@ async function chatReplyProcess(options: RequestOptions) {
 }
 
 async function fetchUsage() {
+  if (apikeys.length > 1)
+    return '-'
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY
   const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
 
